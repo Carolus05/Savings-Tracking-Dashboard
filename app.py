@@ -43,17 +43,21 @@ from dotenv import load_dotenv
 
 def get_env_var():
     load_dotenv()
+    USER_NAME = os.getenv("USER_NAME")
     NOM_RATE = os.getenv("NOM_RATE")
     BANK = os.getenv("BANK")
     MAX_INVESTMENT_VALUE = os.getenv("MAX_INVESTMENT_VALUE")
     MAX_YEARLY_CONTRIBUTION = os.getenv("MAX_YEARLY_CONTRIBUTION")
-    return NOM_RATE, BANK, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION
+    ACCOUNT_HOLDER = os.getenv("ACCOUNT_HOLDER")
+    return USER_NAME, NOM_RATE, BANK, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION, ACCOUNT_HOLDER
 
 env_vars = get_env_var()
-nominal_rate = float(env_vars[0])
-BANK = env_vars[1]
-MAX_INVESTMENT_VALUE = float(env_vars[2])
-MAX_YEARLY_CONTRIBUTION = float(env_vars[3])
+USER_NAME = env_vars[0]
+nominal_rate = float(env_vars[1])
+BANK = env_vars[2]
+MAX_INVESTMENT_VALUE = float(env_vars[3])
+MAX_YEARLY_CONTRIBUTION = float(env_vars[4])
+ACCOUNT_HOLDER = env_vars[5]
 
 compounding_period = 12
 period = {
@@ -126,7 +130,7 @@ def get_interest_paydate(df):
     # Get the last date and add one month
     last_date = pd.to_datetime(filtered_df['Date'].iloc[-1])
     next_interest_paydate = last_date + pd.DateOffset(months=1)
-    
+
     # Return the date in the desired format
     return next_interest_paydate.strftime('%Y-%m-%d')
 
@@ -140,18 +144,18 @@ def full_months_between(start_date, end_date):
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
     if isinstance(end_date, str):
         end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    
+
     # Calculate the difference in years and months
     year_diff = end_date.year - start_date.year
     month_diff = end_date.month - start_date.month
-    
+
     # Calculate total full months difference
     total_month_diff = year_diff * 12 + month_diff
-    
+
     # Adjust if the day of the start date is greater than the end date
     if start_date.day > end_date.day:
         total_month_diff -= 1
-    
+
     return total_month_diff
 
 def Connect_Localhost():
@@ -166,24 +170,24 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
     )
     fig.add_trace(go.Scatter(x=df['Date'], y=df['Balance'],mode='markers',marker=dict(size=1, color='#6200ee'), showlegend=False,
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> %{y:.2f}<br>' + '<extra></extra>'))
-    fig.add_trace(go.Scatter(x=withdrawl_date, y=value_at_withdrawl, name='Withdrawl',mode='markers',marker=dict(size=8, color='rgba(220, 20, 60,0.8)'),
+    '<b>Balance:</b> R%{y:.2f}<br>' + '<extra></extra>'))
+    fig.add_trace(go.Scatter(x=withdrawl_date, y=value_at_withdrawl, name='Withdrawal',mode='markers',marker=dict(size=8, color='rgba(220, 20, 60,0.8)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> %{y:.2f}<br>' +
-    '<b>Withdrawl:</b> %{customdata[0]}<br>' + '<extra></extra>',
+    '<b>Balance:</b> R%{y:.2f}<br>' +
+    '<b>Withdrawal:</b> R%{customdata[0]}<br>' + '<extra></extra>',
     customdata=list(zip([round(withdrawl, 2) for withdrawl in withdrawls]))))
     fig.add_trace(go.Scatter(x=contribution_date, y=Value_at_contribution, name='Contribution', mode='markers',marker=dict(size=8, color='rgba(42, 170, 138,0.8)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> %{y}<br>' +
-    '<b>Contribution:</b> %{customdata[0]:.2f}<br>' + '<extra></extra>',
+    '<b>Balance:</b> R%{y}<br>' +
+    '<b>Contribution:</b> R%{customdata[0]:.2f}<br>' + '<extra></extra>',
     customdata=list(zip([round(contribution, 2) for contribution in contributions]))))
-    fig.add_trace(go.Scatter(x=interest_payment_date, y=value_at_interest_payment, name='Interest Payment', mode='markers',marker=dict(size=8, color='rgba(240, 185, 11, 1.0)'), 
+    fig.add_trace(go.Scatter(x=interest_payment_date, y=value_at_interest_payment, name='Interest Payment', mode='markers',marker=dict(size=8, color='rgba(240, 185, 11, 1.0)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> %{y:.2f}<br>' +
-    '<b>Interest:</b> %{customdata[0]}<br>' + '<extra></extra>',
+    '<b>Balance:</b> R%{y:.2f}<br>' +
+    '<b>Interest:</b> R%{customdata[0]}<br>' + '<extra></extra>',
     customdata=list(zip([round(payment, 2) for payment in interest_payments]))))
     fig.update_layout(
-            yaxis_title="Balance",
+            yaxis_title="Balance (ZAR)",
             xaxis_title=f"Date",
             legend_title="Details",
             xaxis_rangeslider_visible=False
@@ -206,7 +210,7 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
                         label="YTD",
                         step="year",
                         stepmode="todate"),]
-    
+
     if date_diff.days > 365:
         buttons_list.append(dict(count=1,
                         label="1y",
@@ -243,18 +247,18 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
                     borderwidth=0.5,
                     bordercolor='white',
                     font=dict(size=14, color='white'),
-                    x=0, 
+                    x=0,
                     y=1.13,
                     xanchor='left',
                     yanchor='top'
                     ), fixedrange=True, type="date"))
-    
+
 
     return fig
 
 def Pie_Chart(interest, money_invested):
     fig = go.Figure(data=[go.Pie(labels=['Interest Earned', 'Contributions'], values=[interest,money_invested],marker=dict(colors=['rgba(240, 185, 11, 0.8)','rgba(98, 0, 238, 0.9)'],line=dict(color='#000000', width=0.5)), textposition='inside', hole=.3,
-    hovertemplate='<b>%{label}</b><br>Value: %{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
+    hovertemplate='<b>%{label}</b><br>Value: R%{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
     fig.update_layout(
         margin=dict(l=150, r=10, t=50, b=10),
         annotations=[dict(text='TFSA', x=0.5, y=0.5, font_size=25, showarrow=False)]
@@ -269,7 +273,7 @@ def Interest_Chart(df):
     Remaining = round(((nominal_rate * 100) - Interest_paid),2)
 
     fig = go.Figure(data=[
-        go.Bar(name='Interest Paid for current year', x=[0], y=[Interest_paid], marker_color='rgba(42, 170, 138,0.8)',width=0.4, marker_line=dict(width=0.5, color="#000000"),    
+        go.Bar(name='Interest Paid for current year', x=[0], y=[Interest_paid], marker_color='rgba(42, 170, 138,0.8)',width=0.4, marker_line=dict(width=0.5, color="#000000"),
                hovertemplate='Interest Paid: %{y}%<br>' + '<extra></extra>'),
         go.Bar(name='Interest to be paid', x=[0], y=[Remaining], marker_color='rgba(98, 0, 238, 0.9)', width=0.4, marker_line=dict(width=0.5, color="#000000"),
         hovertemplate='Outstanding Interest to be paid: </b> %{y}%<br>' + '<extra></extra>')
@@ -311,33 +315,34 @@ def Bar_Chart(df):
         outstanding_contributions.append(outstanding_contribution)
 
     fig = go.Figure(data=[
-        go.Bar(name='YTD Contribution Amount', x=years, y=annual_contributions, marker_color='rgba(42, 170, 138,0.8)',width=0.6, marker_line=dict(width=0.5, color="#000000"),    
+        go.Bar(name='YTD Contribution Amount', x=years, y=annual_contributions, marker_color='rgba(42, 170, 138,0.8)',width=0.6, marker_line=dict(width=0.5, color="#000000"),
                hovertemplate='<b>Year:</b> %{x}<br>' +
-                '<b>Annual Contributions: </b> %{y:.2f}<br>' + '<extra></extra>'),
+                '<b>Annual Contributions: </b> R%{y:.2f}<br>' + '<extra></extra>'),
         go.Bar(name='Outstanding Conntribution Amount', x=years, y=outstanding_contributions, marker_color='rgba(220, 20, 60,0.8)', width=0.6, marker_line=dict(width=0.5, color="#000000"),
         hovertemplate='<b>Year: </b> %{x}<br>' +
-        '<b>Outstanding Contributions: </b> %{y:.2f}<br>' + '<extra></extra>')
+        '<b>Outstanding Contributions: </b> R%{y:.2f}<br>' + '<extra></extra>')
     ])
-    fig.add_hline(
-        y=MAX_YEARLY_CONTRIBUTION,
-        line_dash="dot",
-        row=3,
-        col="all",
-        line=dict(
-            color="white",  # Set the line color
-            width=0.7  # Set the line width
+    if len(years) > 1:
+        fig.add_hline(
+            y=MAX_YEARLY_CONTRIBUTION,
+            line_dash="dot",
+            row=3,
+            col="all",
+            line=dict(
+                color="white",  # Set the line color
+                width=0.7  # Set the line width
+            )
         )
-    )
 
     fig.update_layout(barmode='stack', template=chart_template)
-    fig.update_yaxes(title_text='Amount')
+    fig.update_yaxes(title_text='Amount (ZAR)')
     fig.update_xaxes(title_text='Year')
     fig.update_layout(legend_title="Details")
     fig.update_layout(margin=dict(l=100, r=10, t=20, b=10))
     position = (len(annual_contributions)/2)-0.5
     fig.add_annotation(
         x=position, y=MAX_YEARLY_CONTRIBUTION,
-        text=f"Annual Contribution Limit:  {int(MAX_YEARLY_CONTRIBUTION)}",
+        text=f"Annual Contribution Limit:  R{int(MAX_YEARLY_CONTRIBUTION)}",
         font={"size":14, "color":"white", "family":"Arial"},
         showarrow=True,
         arrowhead=3,
@@ -369,7 +374,7 @@ def FileUploader():
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.FONT_AWESOME])
 load_figure_template('BOOTSTRAP')
-app.title = f"Savings Account Tracking Dashboard"
+app.title = f"{USER_NAME}'s Tax Free Savings Account Tracker"
 
 app.layout = html.Div([
     html.H2(app.title, style={'text-align': 'center'}),
@@ -399,15 +404,15 @@ def process_file(contents, filename):
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
+            # Assume that the user uploaded an Excel file
             df = pd.read_excel(io.BytesIO(decoded))
-        else: 
+        else:
             return "Invalid file type. Upload a csv or xlsx.", "false"
 
         Date_opened = get_opendate(df=df)
         investment_value = get_investment_value(df=df)
 
-        Output = Output = html.Div([
+        Output =  html.Div([
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         html.H3('General Information'),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
@@ -425,15 +430,15 @@ def process_file(contents, filename):
         ], justify='center'),
         dbc.Row([
             dbc.Col(html.H6("Maximum Savings Balance:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{MAX_INVESTMENT_VALUE:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'R{MAX_INVESTMENT_VALUE:.2f}', style=text_styling)),
             dbc.Col(html.H6('Yearly Contribution Limit:', style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{MAX_YEARLY_CONTRIBUTION:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'R{MAX_YEARLY_CONTRIBUTION:.2f}', style=text_styling)),
         ], justify='center'),
         dbc.Row([
             dbc.Col(html.H6("Current Investment Value:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{investment_value:.2f}', id="current-value", style=text_styling)),
+            dbc.Col(html.H6(f'R{investment_value:.2f}', id="current-value", style=text_styling)),
             dbc.Col(html.H6("Total Interest Earned:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{investment_value:.2f}', id="interest-earned", style=text_styling)),
+            dbc.Col(html.H6(f'R{investment_value:.2f}', id="interest-earned", style=text_styling)),
         ], justify="center"),
         dbc.Row([
             dbc.Col(html.H6("Bank:", style={'font-size': '21px'})),
@@ -450,32 +455,32 @@ def process_file(contents, filename):
             dbc.Col(html.H5("Withdrawal Value:")),
         ], justify='center'),
         dbc.Row([
-            dbc.Col(dcc.Input(id='Date', type='text', value='', placeholder='YYYY-MM-DD', 
-                               style={'width': '150px', 'height': '30px', 
-                                      'border': '1px solid white', 
-                                      'padding': '0.25rem 0.5rem', 
+            dbc.Col(dcc.Input(id='Date', type='text', value='', placeholder='YYYY-MM-DD',
+                               style={'width': '150px', 'height': '30px',
+                                      'border': '1px solid white',
+                                      'padding': '0.25rem 0.5rem',
                                       'border-radius': '5px',
                                       'background-color':'#000000',
                                       'color':'white'}), width=3),
-            dbc.Col(dcc.Input(id='Investment-Value', type='number', value='', placeholder='Enter Value', 
-                               style={'width': '150px', 'height': '30px', 
-                                      'border': '1px solid white',  
-                                      'padding': '0.25rem 0.5rem', 
+            dbc.Col(dcc.Input(id='Investment-Value', type='number', value='', placeholder='Enter Value',
+                               style={'width': '150px', 'height': '30px',
+                                      'border': '1px solid white',
+                                      'padding': '0.25rem 0.5rem',
                                       'border-radius': '5px',
                                       'background-color':'#000000',
                                       'color':'white'}, min=0, max=MAX_INVESTMENT_VALUE), width=3),
-            dbc.Col(dcc.Input(id='Contribution-Value', type='number', value='', placeholder='Enter Value', 
-                               style={'width': '150px', 'height': '30px', 
-                                      'border': '1px solid white',  
-                                      'padding': '0.25rem 0.5rem', 
+            dbc.Col(dcc.Input(id='Contribution-Value', type='number', value='', placeholder='Enter Value',
+                               style={'width': '150px', 'height': '30px',
+                                      'border': '1px solid white',
+                                      'padding': '0.25rem 0.5rem',
                                       'border-radius': '5px',
                                       'background-color':'#000000',
                                       'color':'white'}, min=0, max=MAX_YEARLY_CONTRIBUTION), width=3),
-            dbc.Col(dcc.Input(id='Withdrawal-Value', type='number', value='', placeholder='Enter Value', 
-                               style={'width': '150px', 'height': '30px', 
-                                      'border': '1px solid white',  
-                                      'padding': '0.25rem 0.5rem', 
-                                      'border-radius': '5px', 
+            dbc.Col(dcc.Input(id='Withdrawal-Value', type='number', value='', placeholder='Enter Value',
+                               style={'width': '150px', 'height': '30px',
+                                      'border': '1px solid white',
+                                      'padding': '0.25rem 0.5rem',
+                                      'border-radius': '5px',
                                       'background-color':'#000000',
                                       'color':'white'}, min=0), width=3),
         ], justify='center'),
@@ -495,7 +500,7 @@ def process_file(contents, filename):
     [Output('current-value', 'children'), Output('Date', 'value'), Output('Investment-Value','value'), Output('Contribution-Value','value'), Output('Withdrawal-Value','value'), Output("interest-earned","children"), Output('output', 'children')],
     [Input('save-button', 'n_clicks')],
     [State('Date', 'value'), State('Investment-Value', 'value'),
-        State('Contribution-Value', 'value'), State('Withdrawal-Value', 'value'), 
+        State('Contribution-Value', 'value'), State('Withdrawal-Value', 'value'),
         State('file-upload-status', 'children')]
 )
 def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_value, file_status):
@@ -510,7 +515,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
         }
 
         new_row_df = pd.DataFrame([data])
-        
+
         # Concatenate the DataFrames
         df = pd.concat([df, new_row_df], ignore_index=True)
         print(df)
@@ -533,7 +538,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
                 interest_payment_date.append(df['Date'][i])
                 value_at_interest_payment.append(df['Balance'][i])
                 interest_payments.append(df['Balance'][i] - df['Balance'][i-1])
-            
+
     money_invested = get_invested_amount(contributions=contributions, withdrawls=withdrawls)
     interest = get_interest_earned(investment_value=investment_value, money_invested=money_invested)
 
@@ -560,7 +565,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
                 html.Hr(style={'margin-top': '1%', 'margin-bottom': '2%'}),
         dbc.Row([
             dbc.Col(html.H6("Expected Interest Amount:", style={'font-size': '21px', 'margin-left':'2%'})),
-            dbc.Col(html.H6(f'{Next_InterestPayment:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'R{Next_InterestPayment:.2f}', style=text_styling)),
         ], style={'margin-top':'2%'}),dbc.Row([
             dbc.Col(html.H6("Next Interest Payment Date:", style={'font-size': '21px', 'margin-left': '2%'})),
             dbc.Col(html.H6(f'{interest_paydate}', style=text_styling)),
@@ -596,7 +601,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
 def to_csv(n_clicks):
     if n_clicks > 0:
         return dcc.send_data_frame(df.to_csv, "data.csv")
-    
+
 @app.callback(
     Output("download-dataframe-xlsx", "data"),
     Input("btn_xlsx", "n_clicks"),
