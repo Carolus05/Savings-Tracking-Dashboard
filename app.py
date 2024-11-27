@@ -49,15 +49,17 @@ def get_env_var():
     MAX_INVESTMENT_VALUE = os.getenv("MAX_INVESTMENT_VALUE")
     MAX_YEARLY_CONTRIBUTION = os.getenv("MAX_YEARLY_CONTRIBUTION")
     ACCOUNT_HOLDER = os.getenv("ACCOUNT_HOLDER")
-    return USER_NAME, NOM_RATE, BANK, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION, ACCOUNT_HOLDER
+    CURRENCY = os.getenv("CURRENCY")
+    return USER_NAME, NOM_RATE, BANK, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION, ACCOUNT_HOLDER, CURRENCY
 
 env_vars = get_env_var()
-USER_NAME = env_vars[0]
-nominal_rate = float(env_vars[1])
-BANK = env_vars[2]
-MAX_INVESTMENT_VALUE = float(env_vars[3])
-MAX_YEARLY_CONTRIBUTION = float(env_vars[4])
-ACCOUNT_HOLDER = env_vars[5]
+USER_NAME: str = env_vars[0]
+nominal_rate: float = float(env_vars[1])
+BANK: str = env_vars[2]
+MAX_INVESTMENT_VALUE: float = float(env_vars[3])
+MAX_YEARLY_CONTRIBUTION: float = float(env_vars[4])
+ACCOUNT_HOLDER: str = env_vars[5]
+CURRENCY: str = env_vars[6]
 
 compounding_period = 12
 period = {
@@ -170,21 +172,21 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
     )
     fig.add_trace(go.Scatter(x=df['Date'], y=df['Balance'],mode='markers',marker=dict(size=1, color='#6200ee'), showlegend=False,
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> R%{y:.2f}<br>' + '<extra></extra>'))
+    '<b>Balance:</b> ' + CURRENCY + '%{y:.2f}<br>' + '<extra></extra>'))
     fig.add_trace(go.Scatter(x=withdrawl_date, y=value_at_withdrawl, name='Withdrawal',mode='markers',marker=dict(size=8, color='rgba(220, 20, 60,0.8)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> R%{y:.2f}<br>' +
-    '<b>Withdrawal:</b> R%{customdata[0]}<br>' + '<extra></extra>',
+    '<b>Balance:</b> ' + CURRENCY + '%{y:.2f}<br>' +
+    '<b>Withdrawal:</b> ' + CURRENCY + '%{customdata[0]}<br>' + '<extra></extra>',
     customdata=list(zip([round(withdrawl, 2) for withdrawl in withdrawls]))))
     fig.add_trace(go.Scatter(x=contribution_date, y=Value_at_contribution, name='Contribution', mode='markers',marker=dict(size=8, color='rgba(42, 170, 138,0.8)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> R%{y}<br>' +
-    '<b>Contribution:</b> R%{customdata[0]:.2f}<br>' + '<extra></extra>',
+    '<b>Balance:</b> '+ CURRENCY + '%{y:.2f}<br>' +
+    '<b>Contribution:</b> ' + CURRENCY + '%{customdata[0]:.2f}<br>' + '<extra></extra>',
     customdata=list(zip([round(contribution, 2) for contribution in contributions]))))
     fig.add_trace(go.Scatter(x=interest_payment_date, y=value_at_interest_payment, name='Interest Payment', mode='markers',marker=dict(size=8, color='rgba(240, 185, 11, 1.0)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
-    '<b>Balance:</b> R%{y:.2f}<br>' +
-    '<b>Interest:</b> R%{customdata[0]}<br>' + '<extra></extra>',
+    '<b>Balance:</b> ' + CURRENCY + '%{y:.2f}<br>' +
+    '<b>Interest:</b> ' + CURRENCY + '%{customdata[0]}<br>' + '<extra></extra>',
     customdata=list(zip([round(payment, 2) for payment in interest_payments]))))
     fig.update_layout(
             yaxis_title="Balance (ZAR)",
@@ -258,7 +260,7 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
 
 def Pie_Chart(interest, money_invested):
     fig = go.Figure(data=[go.Pie(labels=['Interest Earned', 'Contributions'], values=[interest,money_invested],marker=dict(colors=['rgba(240, 185, 11, 0.8)','rgba(98, 0, 238, 0.9)'],line=dict(color='#000000', width=0.5)), textposition='inside', hole=.3,
-    hovertemplate='<b>%{label}</b><br>Value: R%{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
+    hovertemplate='<b>%{label}</b><br>Value: ' + CURRENCY + '%{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
     fig.update_layout(
         margin=dict(l=150, r=10, t=50, b=10),
         annotations=[dict(text='TFSA', x=0.5, y=0.5, font_size=25, showarrow=False)]
@@ -285,7 +287,7 @@ def Interest_Chart(df):
     fig.update_layout(margin=dict(l=40, r=40, t=10, b=10))
     fig.add_annotation(
         x=0, y=nominal_rate * 100,
-        text=f"Interest Rate: {nominal_rate*100}%",
+        text=f"Interest Rate: {round(nominal_rate*100,1)}%",
         font={"size":14, "color":"white", "family":"Arial"},
         showarrow=True,
         arrowhead=3,
@@ -317,10 +319,10 @@ def Bar_Chart(df):
     fig = go.Figure(data=[
         go.Bar(name='YTD Contribution Amount', x=years, y=annual_contributions, marker_color='rgba(42, 170, 138,0.8)',width=0.6, marker_line=dict(width=0.5, color="#000000"),
                hovertemplate='<b>Year:</b> %{x}<br>' +
-                '<b>Annual Contributions: </b> R%{y:.2f}<br>' + '<extra></extra>'),
+                '<b>Annual Contributions: </b> '+ CURRENCY + '%{y:.2f}<br>' + '<extra></extra>'),
         go.Bar(name='Outstanding Conntribution Amount', x=years, y=outstanding_contributions, marker_color='rgba(220, 20, 60,0.8)', width=0.6, marker_line=dict(width=0.5, color="#000000"),
         hovertemplate='<b>Year: </b> %{x}<br>' +
-        '<b>Outstanding Contributions: </b> R%{y:.2f}<br>' + '<extra></extra>')
+        '<b>Outstanding Contributions: </b> ' + CURRENCY +'%{y:.2f}<br>' + '<extra></extra>')
     ])
     if len(years) > 1:
         fig.add_hline(
@@ -342,7 +344,7 @@ def Bar_Chart(df):
     position = (len(annual_contributions)/2)-0.5
     fig.add_annotation(
         x=position, y=MAX_YEARLY_CONTRIBUTION,
-        text=f"Annual Contribution Limit:  R{int(MAX_YEARLY_CONTRIBUTION)}",
+        text=f"Annual Contribution Limit:  {CURRENCY}{int(MAX_YEARLY_CONTRIBUTION)}",
         font={"size":14, "color":"white", "family":"Arial"},
         showarrow=True,
         arrowhead=3,
@@ -430,15 +432,15 @@ def process_file(contents, filename):
         ], justify='center'),
         dbc.Row([
             dbc.Col(html.H6("Maximum Savings Balance:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'R{MAX_INVESTMENT_VALUE:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{MAX_INVESTMENT_VALUE:.2f}', style=text_styling)),
             dbc.Col(html.H6('Yearly Contribution Limit:', style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'R{MAX_YEARLY_CONTRIBUTION:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{MAX_YEARLY_CONTRIBUTION:.2f}', style=text_styling)),
         ], justify='center'),
         dbc.Row([
             dbc.Col(html.H6("Current Investment Value:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'R{investment_value:.2f}', id="current-value", style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{investment_value:.2f}', id="current-value", style=text_styling)),
             dbc.Col(html.H6("Total Interest Earned:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'R{investment_value:.2f}', id="interest-earned", style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{investment_value:.2f}', id="interest-earned", style=text_styling)),
         ], justify="center"),
         dbc.Row([
             dbc.Col(html.H6("Bank:", style={'font-size': '21px'})),
@@ -565,7 +567,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
                 html.Hr(style={'margin-top': '1%', 'margin-bottom': '2%'}),
         dbc.Row([
             dbc.Col(html.H6("Expected Interest Amount:", style={'font-size': '21px', 'margin-left':'2%'})),
-            dbc.Col(html.H6(f'R{Next_InterestPayment:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{Next_InterestPayment:.2f}', style=text_styling)),
         ], style={'margin-top':'2%'}),dbc.Row([
             dbc.Col(html.H6("Next Interest Payment Date:", style={'font-size': '21px', 'margin-left': '2%'})),
             dbc.Col(html.H6(f'{interest_paydate}', style=text_styling)),
@@ -591,7 +593,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
 
     if n_clicks > 0:
         print(f"Data saved: {data}")
-    return f'R{investment_value:.2f}', '', '', '', '', f'R{interest:.2f}',output
+    return f'{CURRENCY}{investment_value:.2f}', '', '', '', '', f'{CURRENCY}{interest:.2f}',output
 
 @app.callback(
     Output("download-dataframe-csv", "data"),
@@ -600,7 +602,7 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
 )
 def to_csv(n_clicks):
     if n_clicks > 0:
-        return dcc.send_data_frame(df.to_csv, "data.csv")
+        return dcc.send_data_frame(df.to_csv, "data.csv",index=False)
 
 @app.callback(
     Output("download-dataframe-xlsx", "data"),
@@ -609,7 +611,7 @@ def to_csv(n_clicks):
 )
 def to_excel(n_clicks):
     if n_clicks > 0:
-        return dcc.send_data_frame(df.to_excel, "data.xlsx", sheet_name="Sheet_name_1")
+        return dcc.send_data_frame(df.to_excel, "data.xlsx", sheet_name="Sheet_name_1", index=False)
 
 if __name__ == '__main__':
     Timer(0.1, Connect_Localhost).start()
