@@ -262,7 +262,7 @@ def Pie_Chart(interest, money_invested):
     fig = go.Figure(data=[go.Pie(labels=['Interest Earned', 'Contributions'], values=[interest,money_invested],marker=dict(colors=['rgba(240, 185, 11, 0.8)','rgba(98, 0, 238, 0.9)'],line=dict(color='#000000', width=0.5)), textposition='inside', hole=.3,
     hovertemplate='<b>%{label}</b><br>Value: ' + CURRENCY + '%{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
     fig.update_layout(
-        margin=dict(l=150, r=10, t=50, b=10),
+        margin=dict(l=150, r=10, t=10, b=10),
         annotations=[dict(text='TFSA', x=0.5, y=0.5, font_size=25, showarrow=False)]
     )
     fig.update_layout(legend_title="Details", template=chart_template)
