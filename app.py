@@ -45,21 +45,19 @@ def get_env_var():
     load_dotenv()
     USER_NAME = os.getenv("USER_NAME")
     NOM_RATE = os.getenv("NOM_RATE")
-    BANK = os.getenv("BANK")
     MAX_INVESTMENT_VALUE = os.getenv("MAX_INVESTMENT_VALUE")
     MAX_YEARLY_CONTRIBUTION = os.getenv("MAX_YEARLY_CONTRIBUTION")
     ACCOUNT_HOLDER = os.getenv("ACCOUNT_HOLDER")
     CURRENCY = os.getenv("CURRENCY")
-    return USER_NAME, NOM_RATE, BANK, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION, ACCOUNT_HOLDER, CURRENCY
+    return USER_NAME, NOM_RATE, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION, ACCOUNT_HOLDER, CURRENCY
 
 env_vars = get_env_var()
 USER_NAME: str = env_vars[0]
 nominal_rate: float = float(env_vars[1])
-BANK: str = env_vars[2]
-MAX_INVESTMENT_VALUE: float = float(env_vars[3])
-MAX_YEARLY_CONTRIBUTION: float = float(env_vars[4])
-ACCOUNT_HOLDER: str = env_vars[5]
-CURRENCY: str = env_vars[6]
+MAX_INVESTMENT_VALUE: float = float(env_vars[2])
+MAX_YEARLY_CONTRIBUTION: float = float(env_vars[3])
+ACCOUNT_HOLDER: str = env_vars[4]
+CURRENCY: str = env_vars[5]
 
 compounding_period = 12
 period = {
@@ -263,7 +261,7 @@ def Pie_Chart(interest, money_invested):
     hovertemplate='<b>%{label}</b><br>Value: ' + CURRENCY + '%{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
     fig.update_layout(
         margin=dict(l=150, r=10, t=10, b=10),
-        annotations=[dict(text='TFSA', x=0.5, y=0.5, font_size=25, showarrow=False)]
+        annotations=[dict(text=Account_Type, x=0.5, y=0.5, font_size=25, showarrow=False)]
     )
     fig.update_layout(legend_title="Details", template=chart_template)
     return fig
@@ -376,7 +374,7 @@ def FileUploader():
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.FONT_AWESOME])
 load_figure_template('BOOTSTRAP')
-app.title = f"{USER_NAME}'s Tax Free Savings Account Tracker"
+app.title = f"{USER_NAME}'s Savings Account Tracker"
 
 app.layout = html.Div([
     html.H2(app.title, style={'text-align': 'center'}),
@@ -411,6 +409,10 @@ def process_file(contents, filename):
         else:
             return "Invalid file type. Upload a csv or xlsx.", "false"
 
+        global BANK
+        BANK = (filename.split("_")[0]).upper()
+        global Account_Type
+        Account_Type = (filename.split("_")[1].split(".")[0]).upper()
         Date_opened = get_opendate(df=df)
         investment_value = get_investment_value(df=df)
 
