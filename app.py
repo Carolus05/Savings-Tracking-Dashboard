@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-def check_and_install_packages(packages):
+def checkAndInstallPackages(packages):
     """Check if packages are installed and install them if they are not."""
     for package in packages:
         try:
@@ -13,7 +13,7 @@ def check_and_install_packages(packages):
             print(f"'{package}' is not installed. Installing...")
             subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
-required_packages = [
+requiredPackages = [
     'pandas',
     'dash',
     'dash_bootstrap_components',
@@ -23,7 +23,7 @@ required_packages = [
     'python-dotenv'
 ]
 
-check_and_install_packages(packages=required_packages)
+checkAndInstallPackages(packages=requiredPackages)
 
 import pandas as pd
 from dash import Dash, html, dcc
@@ -41,7 +41,7 @@ from dateutil.relativedelta import relativedelta
 import os
 from dotenv import load_dotenv
 
-def get_env_var():
+def getEnvVar():
     load_dotenv()
     USER_NAME = os.getenv("USER_NAME")
     NOM_RATE = os.getenv("NOM_RATE")
@@ -51,15 +51,15 @@ def get_env_var():
     CURRENCY = os.getenv("CURRENCY")
     return USER_NAME, NOM_RATE, MAX_INVESTMENT_VALUE, MAX_YEARLY_CONTRIBUTION, ACCOUNT_HOLDER, CURRENCY
 
-env_vars = get_env_var()
+env_vars = getEnvVar()
 USER_NAME: str = env_vars[0]
-nominal_rate: float = float(env_vars[1])
+nominalRate: float = float(env_vars[1])
 MAX_INVESTMENT_VALUE: float = float(env_vars[2])
 MAX_YEARLY_CONTRIBUTION: float = float(env_vars[3])
 ACCOUNT_HOLDER: str = env_vars[4]
 CURRENCY: str = env_vars[5]
 
-compounding_period = 12
+compoundingPeriod = 12
 period = {
     "anually": 1,
     "semi-anually": 2,
@@ -67,7 +67,7 @@ period = {
     "monthly": 12
 }
 
-btn_style = {
+btnStyle = {
 "display": "inline-block",
     "height": "38px",
     "padding": "0 30px",
@@ -87,82 +87,90 @@ btn_style = {
     "box-sizing": "border-box",
    }
 
-btn_center_styling = {
+btnCenterStyling = {
         'display': 'flex',
         'justifyContent': 'center',
         'alignItems': 'center'
     }
 
-def get_effective_rate(nominal_rate):
-    effective_rate = ((1 + (nominal_rate / compounding_period)) ** compounding_period) - 1
-    return effective_rate
+def getEffectiveRate(nominalRate):
+    effectiveRate = ((1 + (nominalRate / compoundingPeriod)) ** compoundingPeriod) - 1
+    return effectiveRate
 
-effective_rate = get_effective_rate(nominal_rate=nominal_rate)
+effectiveRate = getEffectiveRate(nominalRate=nominalRate)
 
-chart_template = "plotly_dark"
-text_styling = {'color': '#D3D3D3', 'font-size': '21px'}
+chartTemplate = "plotly_dark"
+textStyling = {'color': '#D3D3D3', 'font-size': '21px'}
 
-def get_period(period):
-    period_str = next((key for key, value in period.items() if value == compounding_period), None)
-    return period_str
+def getPeriod(period):
+    periodStr = next((key for key, value in period.items() if value == compoundingPeriod), None)
+    return periodStr
 
-period_str = get_period(period)
+periodStr = getPeriod(period)
 
-def get_opendate(df):
-    Date_opened = df['Date'][0]
-    return Date_opened
+def getOpenDate(df):
+    dateOpened = df['Date'][0]
+    return dateOpened
 
-def get_investment_value(df):
-    investment_value = df['Balance'][len(df)-1]
-    return investment_value
+def getInvestmentValue(df):
+    investmentValue = df['Balance'][len(df)-1]
+    return investmentValue
 
-def get_invested_amount(contributions, withdrawls):
-    money_invested = sum(contributions) - sum(withdrawls)
-    return money_invested
+def getInvestedAmount(contributions, withdrawls):
+    moneyInvested = sum(contributions) - sum(withdrawls)
+    return moneyInvested
 
-def get_interest_earned(investment_value, money_invested):
-    interest = investment_value - money_invested
+def getInterestEarned(investmentValue, moneyInvested):
+    interest = investmentValue - moneyInvested
     return interest
 
-def get_interest_paydate(df):
+def getInterestPayDate(df):
     # Filter the DataFrame with the correct logical operator and parentheses
-    filtered_df = df[(df["Contribution_Value"] == 0) & (df["Withdrawl_Value"] == 0)]
+    filteredDF = df[(df["Contribution_Value"] == 0) & (df["Withdrawl_Value"] == 0)]
     # Get the last date and add one month
-    last_date = pd.to_datetime(filtered_df['Date'].iloc[-1])
-    next_interest_paydate = last_date + pd.DateOffset(months=1)
+    lastDate = pd.to_datetime(filteredDF['Date'].iloc[-1])
+    nextInterestPayDate = lastDate + pd.DateOffset(months=1)
 
     # Return the date in the desired format
-    return next_interest_paydate.strftime('%Y-%m-%d')
+    return nextInterestPayDate.strftime('%Y-%m-%d')
 
-def Calculate_Next_Interestpayment(nominal_rate, df):
-    projected_interest = (nominal_rate/ 12) * df['Balance'][len(df)-1]
-    return projected_interest
+def calculateNextInterestPayment(nominalRate, df):
+    projectedInterest = (nominalRate/ 12) * df['Balance'][len(df)-1]
+    return projectedInterest
 
-def full_months_between(start_date, end_date):
+def fullMonthsBetween(startDate, endDate):
     # Ensure the dates are datetime objects (in case they are not)
-    if isinstance(start_date, str):
-        start_date = datetime.strptime(start_date, '%Y-%m-%d')
-    if isinstance(end_date, str):
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    if isinstance(startDate, str):
+        startDate = datetime.strptime(startDate, '%Y-%m-%d')
+    if isinstance(endDate, str):
+        endDate = datetime.strptime(endDate, '%Y-%m-%d')
 
     # Calculate the difference in years and months
-    year_diff = end_date.year - start_date.year
-    month_diff = end_date.month - start_date.month
+    yearDiff = endDate.year - startDate.year
+    monthDiff = endDate.month - startDate.month
 
     # Calculate total full months difference
-    total_month_diff = year_diff * 12 + month_diff
+    totalMonthDiff = yearDiff * 12 + monthDiff
 
     # Adjust if the day of the start date is greater than the end date
-    if start_date.day > end_date.day:
-        total_month_diff -= 1
+    if startDate.day > endDate.day:
+        totalMonthDiff -= 1
 
-    return total_month_diff
+    return totalMonthDiff
 
-def Connect_Localhost():
+def connectLocalhost():
     webbrowser.open_new("http://127.0.0.1:8050")
 
-def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contributions, contribution_date, Value_at_contribution, interest_payments, interest_payment_date, value_at_interest_payment):
-    fig = px.area(x=df["Date"], y=df["Balance"], template=chart_template)
+def valueChart(df, withdrawls, withdrawlDate, valueAtWithdrawl, contributions, contributionDate, valueAtContribution, interestPayments, interestPaymentDate, valueAtInteresrPayment):
+    fig = px.area(x=df["Date"], y=df["Balance"], template=chartTemplate)
+
+    sortedPairs = sorted(zip(pd.to_datetime(interestPaymentDate), interestPayments, valueAtInteresrPayment))
+    interestPaymentDate, interestPayments, valueAtInteresrPayment = zip(*sortedPairs)
+
+    interestPaymentDate = [date.strftime("%Y-%m-%d") for date in interestPaymentDate]
+    interestPayments = list(interestPayments)
+    valueAtInteresrPayment = list(valueAtInteresrPayment)
+
     fig.update_traces(
         fill='tozeroy', # Fill area to zero on the y-axis
         fillcolor='rgba(98, 0, 238, 0.3)',  # Area color with transparency
@@ -171,21 +179,21 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
     fig.add_trace(go.Scatter(x=df['Date'], y=df['Balance'],mode='markers',marker=dict(size=1, color='#6200ee'), showlegend=False,
     hovertemplate='<b>Date:</b> %{x}<br>' +
     '<b>Balance:</b> ' + CURRENCY + '%{y:.2f}<br>' + '<extra></extra>'))
-    fig.add_trace(go.Scatter(x=withdrawl_date, y=value_at_withdrawl, name='Withdrawal',mode='markers',marker=dict(size=8, color='rgba(220, 20, 60,0.8)'),
+    fig.add_trace(go.Scatter(x=withdrawlDate, y=valueAtWithdrawl, name='Withdrawal',mode='markers',marker=dict(size=8, color='rgba(220, 20, 60,0.8)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
     '<b>Balance:</b> ' + CURRENCY + '%{y:.2f}<br>' +
     '<b>Withdrawal:</b> ' + CURRENCY + '%{customdata[0]}<br>' + '<extra></extra>',
     customdata=list(zip([round(withdrawl, 2) for withdrawl in withdrawls]))))
-    fig.add_trace(go.Scatter(x=contribution_date, y=Value_at_contribution, name='Contribution', mode='markers',marker=dict(size=8, color='rgba(42, 170, 138,0.8)'),
+    fig.add_trace(go.Scatter(x=contributionDate, y=valueAtContribution, name='Contribution', mode='markers',marker=dict(size=8, color='rgba(42, 170, 138,0.8)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
     '<b>Balance:</b> '+ CURRENCY + '%{y:.2f}<br>' +
     '<b>Contribution:</b> ' + CURRENCY + '%{customdata[0]:.2f}<br>' + '<extra></extra>',
     customdata=list(zip([round(contribution, 2) for contribution in contributions]))))
-    fig.add_trace(go.Scatter(x=interest_payment_date, y=value_at_interest_payment, name='Interest Payment', mode='markers',marker=dict(size=8, color='rgba(240, 185, 11, 1.0)'),
+    fig.add_trace(go.Scatter(x=interestPaymentDate, y=valueAtInteresrPayment, name='Interest Payment', mode='markers',marker=dict(size=8, color='rgba(240, 185, 11, 1.0)'),
     hovertemplate='<b>Date:</b> %{x}<br>' +
     '<b>Balance:</b> ' + CURRENCY + '%{y:.2f}<br>' +
     '<b>Interest:</b> ' + CURRENCY + '%{customdata[0]}<br>' + '<extra></extra>',
-    customdata=list(zip([round(payment, 2) for payment in interest_payments]))))
+    customdata=list(zip([round(payment, 2) for payment in interestPayments]))))
     fig.update_layout(
             yaxis_title="Balance (ZAR)",
             xaxis_title=f"Date",
@@ -196,8 +204,8 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
     df['Date'] = pd.to_datetime(df['Date'])
 
     # Calculate the difference between the first and last date
-    date_diff = df['Date'].iloc[-1] - df['Date'].iloc[0]
-    buttons_list = [
+    dateDiff = df['Date'].iloc[-1] - df['Date'].iloc[0]
+    buttonsList = [
                     dict(count=1,
                         label="1m",
                         step="month",
@@ -211,37 +219,37 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
                         step="year",
                         stepmode="todate"),]
 
-    if date_diff.days > 365:
-        buttons_list.append(dict(count=1,
+    if dateDiff.days > 365:
+        buttonsList.append(dict(count=1,
                         label="1y",
                         step="year",
                         stepmode="backward"),)
-    if date_diff.days > 365 * 2:
-        buttons_list.append(dict(count=2,
+    if dateDiff.days > 365 * 2:
+        buttonsList.append(dict(count=2,
                         label="2y",
                         step="year",
                         stepmode="backward"),)
-    if date_diff.days > 365 * 3:
-        buttons_list.append(dict(count=3,
+    if dateDiff.days > 365 * 3:
+        buttonsList.append(dict(count=3,
                         label="3y",
                         step="year",
                         stepmode="backward"),)
-    if date_diff.days > 365 * 5:
-        buttons_list.append(dict(count=5,
+    if dateDiff.days > 365 * 5:
+        buttonsList.append(dict(count=5,
                         label="5y",
                         step="year",
                         stepmode="backward"),)
-    if date_diff.days > 365 * 10:
-        buttons_list.append(dict(count=10,
+    if dateDiff.days > 365 * 10:
+        buttonsList.append(dict(count=10,
                         label="10y",
                         step="year",
                         stepmode="backward"),)
-    buttons_list.append(dict(step="all"))
+    buttonsList.append(dict(step="all"))
 
     fig.update_layout(
         xaxis=dict(
             rangeselector=dict(
-                buttons=list(buttons_list),
+                buttons=list(buttonsList),
                     bgcolor='black',
                     activecolor='gray', # Color of the active button
                     borderwidth=0.5,
@@ -256,36 +264,36 @@ def Value_Chart(df, withdrawls, withdrawl_date, value_at_withdrawl, contribution
 
     return fig
 
-def Pie_Chart(interest, money_invested):
-    fig = go.Figure(data=[go.Pie(labels=['Interest Earned', 'Contributions'], values=[interest,money_invested],marker=dict(colors=['rgba(240, 185, 11, 0.8)','rgba(98, 0, 238, 0.9)'],line=dict(color='#000000', width=0.5)), textposition='inside', hole=.3,
+def pieChart(interest, moneyInvested):
+    fig = go.Figure(data=[go.Pie(labels=['Interest Earned', 'Contributions'], values=[interest,moneyInvested],marker=dict(colors=['rgba(240, 185, 11, 0.8)','rgba(98, 0, 238, 0.9)'],line=dict(color='#000000', width=0.5)), textposition='inside', hole=.3,
     hovertemplate='<b>%{label}</b><br>Value: ' + CURRENCY + '%{value:.2f}<br>Percentage: %{percent}<extra></extra>')])
     fig.update_layout(
         margin=dict(l=150, r=10, t=10, b=10),
         annotations=[dict(text=Account_Type, x=0.5, y=0.5, font_size=25, showarrow=False)]
     )
-    fig.update_layout(legend_title="Details", template=chart_template)
+    fig.update_layout(legend_title="Details", template=chartTemplate)
     return fig
 
-def Interest_Chart(df):
-    months = full_months_between(start_date=df['Date'].iloc[0], end_date=df['Date'].iloc[-1])
-    remaining_months = months % 12
-    Interest_paid = round(((nominal_rate * (remaining_months/12)) * 100),2)
-    Remaining = round(((nominal_rate * 100) - Interest_paid),2)
+def interestChart(df):
+    months = fullMonthsBetween(startDate=df['Date'].iloc[0], endDate=df['Date'].iloc[-1])
+    remainingMonths = months % 12
+    interestPaid = round(((nominalRate * (remainingMonths/12)) * 100),2)
+    Remaining = round(((nominalRate * 100) - interestPaid),2)
 
     fig = go.Figure(data=[
-        go.Bar(name='Interest Paid for current year', x=[0], y=[Interest_paid], marker_color='rgba(42, 170, 138,0.8)',width=0.4, marker_line=dict(width=0.5, color="#000000"),
+        go.Bar(name='Interest Paid for current year', x=[0], y=[interestPaid], marker_color='rgba(42, 170, 138,0.8)',width=0.4, marker_line=dict(width=0.5, color="#000000"),
                hovertemplate='Interest Paid: %{y}%<br>' + '<extra></extra>'),
         go.Bar(name='Interest to be paid', x=[0], y=[Remaining], marker_color='rgba(98, 0, 238, 0.9)', width=0.4, marker_line=dict(width=0.5, color="#000000"),
         hovertemplate='Outstanding Interest to be paid: </b> %{y}%<br>' + '<extra></extra>')
     ])
 
-    fig.update_layout(barmode='stack', template=chart_template)
+    fig.update_layout(barmode='stack', template=chartTemplate)
     fig.update_yaxes(title_text='Percentage Interest')
     fig.update_layout(legend_title="Details")
     fig.update_layout(margin=dict(l=40, r=40, t=10, b=10))
     fig.add_annotation(
-        x=0, y=nominal_rate * 100,
-        text=f"Interest Rate: {round(nominal_rate*100,1)}%",
+        x=0, y=nominalRate * 100,
+        text=f"Interest Rate: {round(nominalRate*100,1)}%",
         font={"size":14, "color":"white", "family":"Arial"},
         showarrow=True,
         arrowhead=3,
@@ -301,24 +309,24 @@ def Interest_Chart(df):
     )
     return fig
 
-def Bar_Chart(df):
-    outstanding_contributions = []
-    annual_contributions = []
+def barChart(df):
+    outstandingContributions = []
+    annualContributions = []
     df['Date'] = pd.to_datetime(df['Date'])
     years = df['Date'].dt.year.astype(str).unique().tolist()
     df['Date'] = df['Date'].astype(str)
     for year in years:
-        filtered_df = df[df['Date'].str.contains(str(year))]
-        annual_contribution = filtered_df['Contribution_Value'].sum()
-        outstanding_contribution = MAX_YEARLY_CONTRIBUTION - annual_contribution
-        annual_contributions.append(annual_contribution)
-        outstanding_contributions.append(outstanding_contribution)
+        filteredDF = df[df['Date'].str.contains(str(year))]
+        annualContribution = filteredDF['Contribution_Value'].sum()
+        outstandingContribution = MAX_YEARLY_CONTRIBUTION - annualContribution
+        annualContributions.append(annualContribution)
+        outstandingContributions.append(outstandingContribution)
 
     fig = go.Figure(data=[
-        go.Bar(name='YTD Contribution Amount', x=years, y=annual_contributions, marker_color='rgba(42, 170, 138,0.8)',width=0.6, marker_line=dict(width=0.5, color="#000000"),
+        go.Bar(name='YTD Contribution Amount', x=years, y=annualContributions, marker_color='rgba(42, 170, 138,0.8)',width=0.6, marker_line=dict(width=0.5, color="#000000"),
                hovertemplate='<b>Year:</b> %{x}<br>' +
                 '<b>Annual Contributions: </b> '+ CURRENCY + '%{y:.2f}<br>' + '<extra></extra>'),
-        go.Bar(name='Outstanding Conntribution Amount', x=years, y=outstanding_contributions, marker_color='rgba(220, 20, 60,0.8)', width=0.6, marker_line=dict(width=0.5, color="#000000"),
+        go.Bar(name='Outstanding Conntribution Amount', x=years, y=outstandingContributions, marker_color='rgba(220, 20, 60,0.8)', width=0.6, marker_line=dict(width=0.5, color="#000000"),
         hovertemplate='<b>Year: </b> %{x}<br>' +
         '<b>Outstanding Contributions: </b> ' + CURRENCY +'%{y:.2f}<br>' + '<extra></extra>')
     ])
@@ -334,12 +342,12 @@ def Bar_Chart(df):
             )
         )
 
-    fig.update_layout(barmode='stack', template=chart_template)
+    fig.update_layout(barmode='stack', template=chartTemplate)
     fig.update_yaxes(title_text='Amount (ZAR)')
     fig.update_xaxes(title_text='Year')
     fig.update_layout(legend_title="Details")
     fig.update_layout(margin=dict(l=100, r=10, t=20, b=10))
-    position = (len(annual_contributions)/2)-0.5
+    position = (len(annualContributions)/2)-0.5
     fig.add_annotation(
         x=position, y=MAX_YEARLY_CONTRIBUTION,
         text=f"Annual Contribution Limit:  {CURRENCY}{int(MAX_YEARLY_CONTRIBUTION)}",
@@ -351,8 +359,8 @@ def Bar_Chart(df):
     )
     return fig
 
-def FileUploader():
-    file_uploader = dcc.Upload(
+def fileUploader():
+    fileuploader = dcc.Upload(
         id='upload-data',
         children=html.Div([
             'Drag and Drop or ',
@@ -370,7 +378,7 @@ def FileUploader():
         },
         multiple=False
     )
-    return file_uploader
+    return fileuploader
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.FONT_AWESOME])
 load_figure_template('BOOTSTRAP')
@@ -379,23 +387,23 @@ app.title = f"{USER_NAME}'s Savings Account Tracker"
 app.layout = html.Div([
     html.H2(app.title, style={'text-align': 'center'}),
     html.Hr(style={'margin-top': '1%', 'margin-bottom': '2%'}),
-    FileUploader(),
+    fileUploader(),
     html.Hr(style={'margin-top': '2%', 'margin-bottom': '1%'}),
     html.Div(id='file-upload-status', style={'display': 'none'}),
     html.Div(id="file_output"),
     html.Hr(style={'margin-top': '1%', 'margin-bottom': '2%'}),
-], style={'margin-left': '3%', 'margin-right': '3%', 'margin-top': '1%', 'margin-bottom': '1%'})
+], style={'margin-left': '3%', 'margin-right': '3%', 'margin-top': '3%', 'margin-bottom': '3%'})
 
 @app.callback(
     [Output('file_output', 'children'),Output('file-upload-status', 'children')],
     Input('upload-data', 'contents'),
     State('upload-data', 'filename')
 )
-def process_file(contents, filename):
+def processFile(contents, filename):
     global df
     if contents is None:
         return "Upload a file to generate your Dashboard.", "false"
-    content_type, content_string = contents.split(',')
+    contentType, content_string = contents.split(',')
 
     try:
         decoded = base64.b64decode(content_string)
@@ -413,8 +421,8 @@ def process_file(contents, filename):
         BANK = (filename.split("_")[0]).upper()
         global Account_Type
         Account_Type = (filename.split("_")[1].split(".")[0]).upper()
-        Date_opened = get_opendate(df=df)
-        investment_value = get_investment_value(df=df)
+        dateOpened = getOpenDate(df=df)
+        investmentValue = getInvestmentValue(df=df)
 
         Output =  html.Div([
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
@@ -422,31 +430,31 @@ def process_file(contents, filename):
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         dbc.Row([
             dbc.Col(html.H6("Nominal Interest Rate:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{nominal_rate * 100:.1f}%', style=text_styling)),
+            dbc.Col(html.H6(f'{nominalRate * 100:.1f}%', style=textStyling)),
             dbc.Col(html.H6('Effective Interest Rate:', style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{effective_rate * 100:.2f}%', style=text_styling)),
+            dbc.Col(html.H6(f'{effectiveRate * 100:.2f}%', style=textStyling)),
         ]),
         dbc.Row([
             dbc.Col(html.H6("Period Compounded:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{period_str}', style=text_styling)),
+            dbc.Col(html.H6(f'{periodStr}', style=textStyling)),
             dbc.Col(html.H6('Date Opened:', style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{str(Date_opened)}', style=text_styling)),
+            dbc.Col(html.H6(f'{str(dateOpened)}', style=textStyling)),
         ], justify='center'),
         dbc.Row([
             dbc.Col(html.H6("Maximum Savings Balance:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{CURRENCY}{MAX_INVESTMENT_VALUE:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{MAX_INVESTMENT_VALUE:.2f}', style=textStyling)),
             dbc.Col(html.H6('Yearly Contribution Limit:', style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{CURRENCY}{MAX_YEARLY_CONTRIBUTION:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{MAX_YEARLY_CONTRIBUTION:.2f}', style=textStyling)),
         ], justify='center'),
         dbc.Row([
             dbc.Col(html.H6("Current Investment Value:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{CURRENCY}{investment_value:.2f}', id="current-value", style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{investmentValue:.2f}', id="current-value", style=textStyling)),
             dbc.Col(html.H6("Total Interest Earned:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(f'{CURRENCY}{investment_value:.2f}', id="interest-earned", style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{investmentValue:.2f}', id="interest-earned", style=textStyling)),
         ], justify="center"),
         dbc.Row([
             dbc.Col(html.H6("Bank:", style={'font-size': '21px'})),
-            dbc.Col(html.H6(BANK, id="bank", style=text_styling)),
+            dbc.Col(html.H6(BANK, id="bank", style=textStyling)),
         ], justify="center", style={"margin-right" : "50%"}),
 
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
@@ -488,7 +496,7 @@ def process_file(contents, filename):
                                       'background-color':'#000000',
                                       'color':'white'}, min=0), width=3),
         ], justify='center'),
-        dbc.Row(dbc.Col(html.Div(html.Button('Save Data', id='save-button', n_clicks=0, style=btn_style), style={'textAlign': 'center', "margin-top":'5%'}), width=3), justify='center'),
+        dbc.Row(dbc.Col(html.Div(html.Button('Save Data', id='save-button', n_clicks=0, style=btnStyle), style={'textAlign': 'center', "margin-top":'5%'}), width=3), justify='center'),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         html.Div(id='output'),
     ])
@@ -507,52 +515,53 @@ def process_file(contents, filename):
         State('Contribution-Value', 'value'), State('Withdrawal-Value', 'value'),
         State('file-upload-status', 'children')]
 )
-def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_value, file_status):
+def get_data(n_clicks, date, investmentValue, contribution_value, withdrawal_value, fileStatus):
     global df
-    if n_clicks > 0 and file_status == "true":
+    if n_clicks > 0 and fileStatus == "true":
         # Save input values to a dictionary
         data = {
             'Date': date,
-            'Balance': investment_value,
+            'Balance': investmentValue,
             'Contribution_Value': contribution_value,
             'Withdrawl_Value': withdrawal_value
         }
 
-        new_row_df = pd.DataFrame([data])
+        newRowdf = pd.DataFrame([data])
 
         # Concatenate the DataFrames
-        df = pd.concat([df, new_row_df], ignore_index=True)
-        print(df)
+        df = pd.concat([df, newRowdf], ignore_index=True)
+        df = df.sort_values(by='Date', ascending=True)
+        # print(df)
 
-    investment_value = get_investment_value(df=df)
-    contributions, contribution_date, Value_at_contribution = [], [], []
-    withdrawls, withdrawl_date, value_at_withdrawl = [], [], []
-    interest_payments, interest_payment_date, value_at_interest_payment = [], [], []
+    investmentValue = getInvestmentValue(df=df)
+    contributions, contributionDate, valueAtContribution = [], [], []
+    withdrawls, withdrawlDate, valueAtWithdrawl = [], [], []
+    interestPayments, interestPaymentDate, valueAtInteresrPayment = [], [], []
     for i in range(0,len(df)):
         if (df['Contribution_Value'][i] != 0) and (df['Withdrawl_Value'][i] == 0):
             contributions.append(df['Contribution_Value'][i])
-            Value_at_contribution.append(df['Balance'][i])
-            contribution_date.append(df['Date'][i])
+            valueAtContribution.append(df['Balance'][i])
+            contributionDate.append(df['Date'][i])
         if (df['Withdrawl_Value'][i] != 0) and (df['Contribution_Value'][i] == 0):
             withdrawls.append(df['Withdrawl_Value'][i])
-            withdrawl_date.append(df['Date'][i])
-            value_at_withdrawl.append(df['Balance'][i])
+            withdrawlDate.append(df['Date'][i])
+            valueAtWithdrawl.append(df['Balance'][i])
         if (df['Withdrawl_Value'][i] == 0) and (df['Contribution_Value'][i] == 0):
             if i != 0 and ((df['Balance'][i] - df['Balance'][i-1]) != 0):
-                interest_payment_date.append(df['Date'][i])
-                value_at_interest_payment.append(df['Balance'][i])
-                interest_payments.append(df['Balance'][i] - df['Balance'][i-1])
+                interestPaymentDate.append(df['Date'][i])
+                valueAtInteresrPayment.append(df['Balance'][i])
+                interestPayments.append(df['Balance'][i] - df['Balance'][i-1])
 
-    money_invested = get_invested_amount(contributions=contributions, withdrawls=withdrawls)
-    interest = get_interest_earned(investment_value=investment_value, money_invested=money_invested)
+    moneyInvested = getInvestedAmount(contributions=contributions, withdrawls=withdrawls)
+    interest = getInterestEarned(investmentValue=investmentValue, moneyInvested=moneyInvested)
 
-    interest_paydate = get_interest_paydate(df=df)
-    Next_InterestPayment = Calculate_Next_Interestpayment(nominal_rate=nominal_rate, df=df)
+    interestPayDate = getInterestPayDate(df=df)
+    nextInterestPayment = calculateNextInterestPayment(nominalRate=nominalRate, df=df)
 
     output = [
         html.H3("Savings Tracking Chart"),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
-        html.Div(dcc.Graph(figure=Value_Chart(df=df, withdrawls=withdrawls, withdrawl_date=withdrawl_date, value_at_withdrawl=value_at_withdrawl,contributions=contributions, contribution_date=contribution_date, Value_at_contribution=Value_at_contribution, interest_payments=interest_payments, interest_payment_date=interest_payment_date, value_at_interest_payment=value_at_interest_payment), config={'displayModeBar': False}, style={'height': '60vh', 'width': '100%'})),
+        html.Div(dcc.Graph(figure=valueChart(df=df, withdrawls=withdrawls, withdrawlDate=withdrawlDate, valueAtWithdrawl=valueAtWithdrawl,contributions=contributions, contributionDate=contributionDate, valueAtContribution=valueAtContribution, interestPayments=interestPayments, interestPaymentDate=interestPaymentDate, valueAtInteresrPayment=valueAtInteresrPayment), config={'displayModeBar': False}, style={'height': '60vh', 'width': '100%'})),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         html.Div(
             [
@@ -564,15 +573,15 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         html.Div(
             [
-                html.Div(dcc.Graph(figure=Pie_Chart(interest=interest,money_invested=money_invested), config={'displayModeBar': False}, style={'height': '55vh', 'width': '100%'}), style={"flex": "1","padding": "10px"}),
-                html.Div([dcc.Graph(figure=Interest_Chart(df=df), config={'displayModeBar': False}, style={'height': '50vh', 'width': '100%','margin-left':'2%'}),
+                html.Div(dcc.Graph(figure=pieChart(interest=interest,moneyInvested=moneyInvested), config={'displayModeBar': False}, style={'height': '55vh', 'width': '100%'}), style={"flex": "1","padding": "10px"}),
+                html.Div([dcc.Graph(figure=interestChart(df=df), config={'displayModeBar': False}, style={'height': '50vh', 'width': '100%','margin-left':'2%'}),
                 html.Hr(style={'margin-top': '1%', 'margin-bottom': '2%'}),
         dbc.Row([
             dbc.Col(html.H6("Expected Interest Amount:", style={'font-size': '21px', 'margin-left':'2%'})),
-            dbc.Col(html.H6(f'{CURRENCY}{Next_InterestPayment:.2f}', style=text_styling)),
+            dbc.Col(html.H6(f'{CURRENCY}{nextInterestPayment:.2f}', style=textStyling)),
         ], style={'margin-top':'2%'}),dbc.Row([
             dbc.Col(html.H6("Next Interest Payment Date:", style={'font-size': '21px', 'margin-left': '2%'})),
-            dbc.Col(html.H6(f'{interest_paydate}', style=text_styling)),
+            dbc.Col(html.H6(f'{interestPayDate}', style=textStyling)),
         ])], style={"flex": "1", "padding": "20px"})
             ],
             style={"display": "flex", "width": "100%"}
@@ -580,22 +589,22 @@ def get_data(n_clicks, date, investment_value, contribution_value, withdrawal_va
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         html.H3("Yearly Savings Contribution Status: Paid vs. Outstanding"),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
-        html.Div(dcc.Graph(figure=Bar_Chart(df=df), config={'displayModeBar': False}, style={'height': '60vh', 'width': '100%'})),
+        html.Div(dcc.Graph(figure=barChart(df=df), config={'displayModeBar': False}, style={'height': '60vh', 'width': '100%'})),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         html.H3("Export data as csv or Excel"),
         html.Hr(style={'margin-top': '1%', 'margin-bottom': '1%'}),
         dbc.Row([
             dbc.Col(html.Div([
-        html.Button("Download CSV", id="btn_csv",style=btn_style),
+        html.Button("Download CSV", id="btn_csv",style=btnStyle),
         dcc.Download(id="download-dataframe-csv"),
-        ],style=btn_center_styling), ),
-            dbc.Col(html.Div([html.Button("Download Excel", id="btn_xlsx", style=btn_style),dcc.Download(id="download-dataframe-xlsx"),], style=btn_center_styling),),
+        ],style=btnCenterStyling), ),
+            dbc.Col(html.Div([html.Button("Download Excel", id="btn_xlsx", style=btnStyle),dcc.Download(id="download-dataframe-xlsx"),], style=btnCenterStyling),),
         ], justify='center'),
     ]
 
     if n_clicks > 0:
         print(f"Data saved: {data}")
-    return f'{CURRENCY}{investment_value:.2f}', '', '', '', '', f'{CURRENCY}{interest:.2f}',output
+    return f'{CURRENCY}{investmentValue:.2f}', '', '', '', '', f'{CURRENCY}{interest:.2f}',output
 
 @app.callback(
     Output("download-dataframe-csv", "data"),
@@ -616,6 +625,6 @@ def to_excel(n_clicks):
         return dcc.send_data_frame(df.to_excel, "data.xlsx", sheet_name="Sheet_name_1", index=False)
 
 if __name__ == '__main__':
-    Timer(0.1, Connect_Localhost).start()
+    Timer(0.1, connectLocalhost).start()
     # starts the server
     app.run_server()
