@@ -381,6 +381,26 @@ def fileUploader():
     return fileuploader
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.FONT_AWESOME])
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
+
 load_figure_template('BOOTSTRAP')
 app.title = f"{USER_NAME}'s Savings Account Tracker"
 
